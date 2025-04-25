@@ -2,21 +2,28 @@ import streamlit as st
 import pandas as pd
 import cloudpickle
 
-# Load the trained pipeline model
+# Load the model safely
 try:
     with open("credit_risk_model.pkl", "rb") as f:
-        model = cloudpickle.load(f)
+        loaded_obj = cloudpickle.load(f)
+
+    # If it's a dict, extract the actual model
+    if isinstance(loaded_obj, dict) and "model" in loaded_obj:
+        model = loaded_obj["model"]
+    else:
+        model = loaded_obj
+
 except Exception as e:
     st.error(f"❌ Failed to load model: {e}")
     st.stop()
 
-# Verify model has a predict method
+# Validate model
 if not hasattr(model, "predict"):
     st.error("❌ Loaded object does not have a `predict` method.")
+    st.write("ℹ️ Type loaded:", type(model))
     st.stop()
 
 st.title("🏦 Credit Risk Prediction")
-
 st.markdown("Enter details of the applicant to assess **credit risk**.")
 
 # Input form
@@ -37,7 +44,6 @@ with st.form("credit_form"):
 
     submitted = st.form_submit_button("Predict")
 
-# Handle input
 if submitted:
     input_dict = {
         "Age": age,
@@ -64,5 +70,5 @@ if submitted:
 
     except Exception as e:
         st.error(f"❌ Prediction failed: {e}")
-        st.write("Check if input format matches the model's expected features.")
-        st.write("Your input columns:", input_df.columns.tolist())
+        st.write("🧪 Check input format and features expected by model.")
+        st.write("📋 Your input:", input_df)
