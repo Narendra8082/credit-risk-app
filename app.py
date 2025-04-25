@@ -1,29 +1,22 @@
 import streamlit as st
 import pandas as pd
 import cloudpickle
-import numpy as np
 
 st.title("🏦 Credit Risk Prediction")
 st.markdown("Enter details of the applicant to assess **credit risk**.")
 
-# Step 1: Try to load the model
-model = None
+# Load the model
 try:
     with open("credit_risk_model.pkl", "rb") as f:
-        loaded_obj = cloudpickle.load(f)
+        model = cloudpickle.load(f)
 
-    if hasattr(loaded_obj, "predict"):
-        model = loaded_obj
-    elif isinstance(loaded_obj, dict) and hasattr(loaded_obj.get("model", None), "predict"):
-        model = loaded_obj["model"]
-    else:
-        st.error("❌ Loaded object is not a valid model. It may be a NumPy array or unrelated data.")
-        st.stop()
+    if not hasattr(model, "predict"):
+        raise ValueError("Loaded object does not have a predict method.")
 except Exception as e:
-    st.error(f"❌ Error loading model: {str(e)}")
+    st.error(f"❌ Failed to load model: {e}")
     st.stop()
 
-# Step 2: Input form
+# Input form
 with st.form("credit_form"):
     age = st.number_input("Age", min_value=18, max_value=100, value=30)
     job = st.selectbox("Job Type (0=Unskilled, 3=Highly Skilled)", options=[0, 1, 2, 3])
@@ -41,9 +34,8 @@ with st.form("credit_form"):
 
     submitted = st.form_submit_button("Predict")
 
-# Step 3: Make prediction
 if submitted:
-    input_dict = {
+    input_data = {
         "Age": age,
         "Job": job,
         "Credit amount": credit_amount,
@@ -55,7 +47,7 @@ if submitted:
         "Purpose": purpose,
     }
 
-    input_df = pd.DataFrame([input_dict])
+    input_df = pd.DataFrame([input_data])
 
     try:
         prediction = model.predict(input_df)[0]
@@ -66,6 +58,5 @@ if submitted:
         else:
             st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
     except Exception as e:
-        st.error(f"❌ Prediction failed: {str(e)}")
-        st.write("📋 Input DataFrame:")
+        st.error(f"❌ Prediction error: {e}")
         st.dataframe(input_df)
