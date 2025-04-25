@@ -1,32 +1,30 @@
 import streamlit as st
 import pandas as pd
 import cloudpickle
-
-# Load the model safely
-try:
-    with open("credit_risk_model.pkl", "rb") as f:
-        loaded_obj = cloudpickle.load(f)
-
-    # If it's a dict, extract the actual model
-    if isinstance(loaded_obj, dict) and "model" in loaded_obj:
-        model = loaded_obj["model"]
-    else:
-        model = loaded_obj
-
-except Exception as e:
-    st.error(f"❌ Failed to load model: {e}")
-    st.stop()
-
-# Validate model
-if not hasattr(model, "predict"):
-    st.error("❌ Loaded object does not have a `predict` method.")
-    st.write("ℹ️ Type loaded:", type(model))
-    st.stop()
+import numpy as np
 
 st.title("🏦 Credit Risk Prediction")
 st.markdown("Enter details of the applicant to assess **credit risk**.")
 
-# Input form
+# Step 1: Try to load the model
+model = None
+try:
+    with open("credit_risk_model.pkl", "rb") as f:
+        loaded_obj = cloudpickle.load(f)
+
+    if hasattr(loaded_obj, "predict"):
+        model = loaded_obj
+    elif isinstance(loaded_obj, dict) and hasattr(loaded_obj.get("model", None), "predict"):
+        model = loaded_obj["model"]
+    else:
+        st.error("❌ Loaded object is not a valid model. It appears to be a NumPy array or unrelated data.")
+        st.stop()
+
+except Exception as e:
+    st.error(f"❌ Error loading model: {e}")
+    st.stop()
+
+# Step 2: UI for input
 with st.form("credit_form"):
     age = st.number_input("Age", min_value=18, max_value=100, value=30)
     job = st.selectbox("Job Type (0=Unskilled, 3=Highly Skilled)", options=[0, 1, 2, 3])
@@ -44,6 +42,7 @@ with st.form("credit_form"):
 
     submitted = st.form_submit_button("Predict")
 
+# Step 3: Make prediction
 if submitted:
     input_dict = {
         "Age": age,
@@ -67,8 +66,7 @@ if submitted:
             st.success(f"✅ **Approved** - Probability of risk: {probability:.2f}")
         else:
             st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
-
     except Exception as e:
         st.error(f"❌ Prediction failed: {e}")
-        st.write("🧪 Check input format and features expected by model.")
-        st.write("📋 Your input:", input_df)
+        st.write("📋 Input DataFrame:")
+        st.dataframe(input_df)
