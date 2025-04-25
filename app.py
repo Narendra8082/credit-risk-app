@@ -16,7 +16,7 @@ def user_input_features():
     age = st.number_input("Age (e.g., 35)", min_value=18, max_value=100, value=30, step=1)
     sex = st.selectbox("Sex", ["male", "female"])
     job = st.number_input("Job type (e.g., 0, 1, 2, 3)", min_value=0, max_value=3, value=1, step=1)
-    housing = st.selectbox("Housing", ["own", "free", "rent"])  # Fixed potential NameError here
+    housing = st.selectbox("Housing", ["own", "free", "rent"])
     saving_accounts = st.selectbox("Saving Accounts", ["little", "moderate", "rich", "quite rich", "unknown"])
     checking_account = st.selectbox("Checking Account", ["little", "moderate", "rich", "unknown"])
     credit_amount = st.number_input("Credit Amount (e.g., 1000)", min_value=0, value=1000, step=100)
@@ -45,9 +45,6 @@ def user_input_features():
 # Preprocess the user input to match the trained model
 def preprocess_input(input_df):
     # Match preprocessing from training (e.g., one-hot encoding, scaling)
-    # Note: The below preprocessing should replicate the same transformations used during training.
-    
-    # Categorical Columns
     categorical_columns = ["Sex", "Housing", "Saving accounts", "Checking account", "Purpose"]
     
     # One-hot encode categorical columns
@@ -57,7 +54,6 @@ def preprocess_input(input_df):
     input_df = input_df.drop(categorical_columns, axis=1).join(one_hot_encoded)
     
     # Ensure column order matches the model's training data
-    # Note: Replace `expected_columns` with the actual column order used during training
     expected_columns = [
         "Age", "Job", "Credit amount", "Duration", 
         "Sex_female", "Sex_male", "Housing_free", "Housing_own", "Housing_rent",
@@ -88,12 +84,19 @@ def main():
         # Preprocess user input
         processed_input = preprocess_input(input_df)
 
-        # Make prediction
-        prediction = model.predict(processed_input)
-        prediction_label = "Good Risk" if prediction[0] == 0 else "Bad Risk"
+        # Debugging: Show processed input
+        st.write("Processed Input:")
+        st.dataframe(processed_input)
 
-        # Display prediction
-        st.write(f"### Prediction: {prediction_label}")
+        try:
+            # Make prediction
+            prediction = model.predict(processed_input)
+            prediction_label = "Good Risk" if prediction[0] == 0 else "Bad Risk"
+
+            # Display prediction
+            st.write(f"### Prediction: {prediction_label}")
+        except ValueError as e:
+            st.error(f"Error during prediction: {str(e)}")
 
 if __name__ == "__main__":
     main()
