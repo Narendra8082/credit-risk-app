@@ -12,42 +12,31 @@ except FileNotFoundError:
     st.error("Feature list file (model_features.pkl) is missing. Ensure it is available in the same directory as this app.")
     st.stop()
 
-# Sidebar for user inputs
+# Function to collect user input
 def user_input_features():
-    st.sidebar.title("Applicant Details")
-    st.sidebar.write("Enter the details below to assess credit risk:")
+    st.subheader("Applicant Details")
+    st.write("Enter the details below to assess credit risk:")
+
+    col1, col2 = st.columns(2)
 
     # Input fields
-    age = st.sidebar.number_input(
-        "Age (e.g., 35)", min_value=18, max_value=100, value=30, step=1, help="Enter the applicant's age"
-    )
-    sex = st.sidebar.selectbox(
-        "Sex", ["male", "female"], help="Select the applicant's gender"
-    )
-    job = st.sidebar.number_input(
-        "Job type (e.g., 0, 1, 2, 3)", min_value=0, max_value=3, value=1, step=1, help="Enter the job type (0: unskilled, 3: highly skilled)"
-    )
-    housing = st.sidebar.selectbox(
-        "Housing", ["own", "free", "rent"], help="Select the applicant's housing status"
-    )
-    saving_accounts = st.sidebar.selectbox(
-        "Saving Accounts", ["little", "moderate", "rich", "quite rich", "unknown"], help="Select the saving account status"
-    )
-    checking_account = st.sidebar.selectbox(
-        "Checking Account", ["little", "moderate", "rich", "unknown"], help="Select the checking account status"
-    )
-    credit_amount = st.sidebar.number_input(
-        "Credit Amount (e.g., 1000)", min_value=0, value=1000, step=100, help="Enter the credit amount requested (in dollars)"
-    )
-    duration = st.sidebar.number_input(
-        "Duration (in months, e.g., 12)", min_value=1, value=12, step=1, help="Enter the duration of the loan in months"
-    )
-    purpose = st.sidebar.selectbox(
-        "Purpose",
-        ["business", "car", "domestic appliances", "education", "furniture/equipment", 
-         "radio/TV", "repairs", "vacation/others"],
-        help="Select the purpose of the loan"
-    )
+    with col1:
+        age = st.number_input("Age (e.g., 35)", min_value=18, max_value=100, value=30, step=1, help="Enter the applicant's age")
+        job = st.number_input("Job type (e.g., 0, 1, 2, 3)", min_value=0, max_value=3, value=1, step=1, help="Enter the job type (0: unskilled, 3: highly skilled)")
+        housing = st.selectbox("Housing", ["own", "free", "rent"], help="Select the applicant's housing status")
+        saving_accounts = st.selectbox("Saving Accounts", ["little", "moderate", "rich", "quite rich", "unknown"], help="Select the saving account status")
+        credit_amount = st.number_input("Credit Amount (e.g., 1000)", min_value=0, value=1000, step=100, help="Enter the credit amount requested (in dollars)")
+
+    with col2:
+        sex = st.selectbox("Sex", ["male", "female"], help="Select the applicant's gender")
+        checking_account = st.selectbox("Checking Account", ["little", "moderate", "rich", "unknown"], help="Select the checking account status")
+        duration = st.number_input("Duration (in months, e.g., 12)", min_value=1, value=12, step=1, help="Enter the duration of the loan in months")
+        purpose = st.selectbox(
+            "Purpose",
+            ["business", "car", "domestic appliances", "education", "furniture/equipment", 
+             "radio/TV", "repairs", "vacation/others"],
+            help="Select the purpose of the loan"
+        )
 
     # Collect inputs into a dictionary
     data = {
@@ -92,7 +81,7 @@ def main():
 
     input_df = user_input_features()
 
-    if st.sidebar.button("Predict Risk"):
+    if st.button("Predict Risk"):
         # Preprocess user input
         processed_input = preprocess_input(input_df)
 
