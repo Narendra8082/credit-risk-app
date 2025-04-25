@@ -17,14 +17,13 @@ try:
     elif isinstance(loaded_obj, dict) and hasattr(loaded_obj.get("model", None), "predict"):
         model = loaded_obj["model"]
     else:
-        st.error("❌ Loaded object is not a valid model. It appears to be a NumPy array or unrelated data.")
+        st.error("❌ Loaded object is not a valid model. It may be a NumPy array or unrelated data.")
         st.stop()
-
 except Exception as e:
-    st.error(f"❌ Error loading model: {e}")
+    st.error(f"❌ Error loading model: {str(e)}")
     st.stop()
 
-# Step 2: UI for input
+# Step 2: Input form
 with st.form("credit_form"):
     age = st.number_input("Age", min_value=18, max_value=100, value=30)
     job = st.selectbox("Job Type (0=Unskilled, 3=Highly Skilled)", options=[0, 1, 2, 3])
@@ -67,6 +66,6 @@ if submitted:
         else:
             st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
     except Exception as e:
-        st.error(f"❌ Prediction failed: {e}")
+        st.error(f"❌ Prediction failed: {str(e)}")
         st.write("📋 Input DataFrame:")
         st.dataframe(input_df)
