@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
 
 # Load the trained model and feature names
@@ -85,7 +84,7 @@ def main():
         try:
             # Make prediction
             prediction = model.predict(processed_input)
-            prediction_label = "Good Risk" if prediction[0] == 0 else "Bad Risk"
+            prediction_label = "Approved" if prediction[0] == 0 else "Denied"
 
             # Display prediction
             st.write(f"### Prediction: {prediction_label}")
