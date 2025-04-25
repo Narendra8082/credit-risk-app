@@ -3,8 +3,17 @@ import pandas as pd
 import cloudpickle
 
 # Load the trained pipeline model
-with open("credit_risk_model.pkl", "rb") as f:
-    model = cloudpickle.load(f)
+try:
+    with open("credit_risk_model.pkl", "rb") as f:
+        model = cloudpickle.load(f)
+except Exception as e:
+    st.error(f"❌ Failed to load model: {e}")
+    st.stop()
+
+# Verify model has a predict method
+if not hasattr(model, "predict"):
+    st.error("❌ Loaded object does not have a `predict` method.")
+    st.stop()
 
 st.title("🏦 Credit Risk Prediction")
 
@@ -30,7 +39,6 @@ with st.form("credit_form"):
 
 # Handle input
 if submitted:
-    # Convert inputs into a dataframe
     input_dict = {
         "Age": age,
         "Job": job,
@@ -45,11 +53,16 @@ if submitted:
 
     input_df = pd.DataFrame([input_dict])
 
-    # Predict
-    prediction = model.predict(input_df)[0]
-    probability = model.predict_proba(input_df)[0][1]
+    try:
+        prediction = model.predict(input_df)[0]
+        probability = model.predict_proba(input_df)[0][1]
 
-    if prediction == 1:
-        st.success(f"✅ **Approved** - Probability of risk: {probability:.2f}")
-    else:
-        st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
+        if prediction == 1:
+            st.success(f"✅ **Approved** - Probability of risk: {probability:.2f}")
+        else:
+            st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
+
+    except Exception as e:
+        st.error(f"❌ Prediction failed: {e}")
+        st.write("Check if input format matches the model's expected features.")
+        st.write("Your input columns:", input_df.columns.tolist())
