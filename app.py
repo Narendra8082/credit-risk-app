@@ -13,7 +13,7 @@ st.title("🏦 Credit Risk Prediction")
 st.markdown("Enter details of the applicant to assess **credit risk**.")
 
 # Input form
-@@ -30,26 +31,40 @@
+# @@ -30,26 +31,40 @@
 
 # Handle input
 if submitted:
