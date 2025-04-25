@@ -3,8 +3,15 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# Load the trained model
+# Load the trained model and feature names
 model = joblib.load("knn_model.pkl")
+
+# Load the feature names used during training
+try:
+    expected_columns = joblib.load("model_features.pkl")
+except FileNotFoundError:
+    st.error("Feature list file (model_features.pkl) is missing. Ensure it is available in the same directory as this app.")
+    st.stop()
 
 # Define the input fields for user input
 def user_input_features():
@@ -53,25 +60,12 @@ def preprocess_input(input_df):
     # Drop original categorical columns and add one-hot-encoded columns
     input_df = input_df.drop(categorical_columns, axis=1).join(one_hot_encoded)
     
-    # Ensure column order matches the model's training data
-    expected_columns = [
-        "Age", "Job", "Credit amount", "Duration", 
-        "Sex_female", "Sex_male", "Housing_free", "Housing_own", "Housing_rent",
-        "Saving accounts_little", "Saving accounts_moderate", "Saving accounts_rich", 
-        "Saving accounts_quite rich", "Saving accounts_unknown",
-        "Checking account_little", "Checking account_moderate",
-        "Checking account_rich", "Checking account_unknown",
-        "Purpose_business", "Purpose_car", "Purpose_domestic appliances",
-        "Purpose_education", "Purpose_furniture/equipment", 
-        "Purpose_radio/TV", "Purpose_repairs", "Purpose_vacation/others"
-    ]
-    
     # Add missing columns with zeros if necessary
     for col in expected_columns:
         if col not in input_df.columns:
             input_df[col] = 0
     
-    # Reorder columns to match the expected order
+    # Ensure column order matches the expected order
     input_df = input_df[expected_columns]
     
     return input_df
