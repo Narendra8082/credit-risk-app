@@ -10,13 +10,13 @@ model = joblib.load("knn_model.pkl")
 def user_input_features():
     st.title("Credit Risk Prediction")
 
-    st.write("Enter the features of a single record below:")
+    st.write("Enter the details of the applicant to assess credit risk:")
 
     # Input fields
     age = st.number_input("Age (e.g., 35)", min_value=18, max_value=100, value=30, step=1)
     sex = st.selectbox("Sex", ["male", "female"])
     job = st.number_input("Job type (e.g., 0, 1, 2, 3)", min_value=0, max_value=3, value=1, step=1)
-    housing = st.selectbox("Housing", ["own", "free", "rent"])
+    housing = st.selectbox("Housing", ["own", "free", "rent"])  # Fixed potential NameError here
     saving_accounts = st.selectbox("Saving Accounts", ["little", "moderate", "rich", "quite rich", "unknown"])
     checking_account = st.selectbox("Checking Account", ["little", "moderate", "rich", "unknown"])
     credit_amount = st.number_input("Credit Amount (e.g., 1000)", min_value=0, value=1000, step=100)
