@@ -2,19 +2,13 @@ import streamlit as st
 import pandas as pd
 import cloudpickle
 
+# Load the trained pipeline model
+with open("credit_risk_model.pkl", "rb") as f:
+    model = cloudpickle.load(f)
+
 st.title("🏦 Credit Risk Prediction")
+
 st.markdown("Enter details of the applicant to assess **credit risk**.")
-
-# Load the model
-try:
-    with open("credit_risk_model.pkl", "rb") as f:
-        model = cloudpickle.load(f)
-
-    if not hasattr(model, "predict"):
-        raise ValueError("Loaded object does not have a predict method.")
-except Exception as e:
-    st.error(f"❌ Failed to load model: {e}")
-    st.stop()
 
 # Input form
 with st.form("credit_form"):
@@ -34,8 +28,10 @@ with st.form("credit_form"):
 
     submitted = st.form_submit_button("Predict")
 
+# Handle input
 if submitted:
-    input_data = {
+    # Convert inputs into a dataframe
+    input_dict = {
         "Age": age,
         "Job": job,
         "Credit amount": credit_amount,
@@ -47,16 +43,13 @@ if submitted:
         "Purpose": purpose,
     }
 
-    input_df = pd.DataFrame([input_data])
+    input_df = pd.DataFrame([input_dict])
 
-    try:
-        prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df)[0][1]
+    # Predict
+    prediction = model.predict(input_df)[0]
+    probability = model.predict_proba(input_df)[0][1]
 
-        if prediction == 1:
-            st.success(f"✅ **Approved** - Probability of risk: {probability:.2f}")
-        else:
-            st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
-    except Exception as e:
-        st.error(f"❌ Prediction error: {e}")
-        st.dataframe(input_df)
+    if prediction == 1:
+        st.success(f"✅ **Approved** - Probability of risk: {probability:.2f}")
+    else:
+        st.error(f"❌ **Denied** - Probability of risk: {probability:.2f}")
